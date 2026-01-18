@@ -16,6 +16,19 @@ export default defineConfig({
           'prime-vendor': ['primereact'],
         },
       },
+      external: (id) => {
+        // Externalize optional PrimeReact dependencies that we don't use
+        const optionalDeps = [
+          'chart.js',
+          'chart.js/auto',
+          'quill',
+          '@fullcalendar/core',
+          '@fullcalendar/daygrid',
+          '@fullcalendar/timegrid',
+          '@fullcalendar/interaction',
+        ]
+        return optionalDeps.some(dep => id === dep || id.startsWith(`${dep}/`))
+      },
     },
     chunkSizeWarningLimit: 1000,
   },
