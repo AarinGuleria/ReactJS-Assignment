@@ -108,13 +108,20 @@ artwork-table-app/
 │   ├── main.tsx             # Application entry point
 │   ├── index.css            # Global styles
 │   ├── types.ts             # TypeScript type definitions
+│   ├── vite-env.d.ts        # Vite environment type definitions
 │   ├── services/
 │   │   └── api.ts          # API service for fetching artwork data
 │   └── ...
 ├── public/                  # Static assets
 ├── package.json            # Dependencies and scripts
 ├── tsconfig.json           # TypeScript configuration
-├── vite.config.ts          # Vite configuration
+├── vite.config.ts          # Vite build configuration
+├── netlify.toml            # Netlify deployment configuration
+├── vercel.json             # Vercel deployment configuration
+├── cloudflare-pages.json   # Cloudflare Pages configuration
+├── _redirects              # Netlify SPA routing redirects
+├── DEPLOYMENT.md           # Detailed deployment guide
+├── DEPLOYMENT_CHECKLIST.md # Pre/post-deployment checklist
 └── README.md               # This file
 ```
 
@@ -137,6 +144,11 @@ The application uses a smart selection strategy that:
 - Uses Set data structure for O(1) selection lookups
 - Efficient re-renders with React hooks
 - No unnecessary API calls
+- Production build optimizations:
+  - Code splitting (React and PrimeReact vendor chunks)
+  - Minification with esbuild
+  - Tree-shaking for unused code
+  - Asset optimization and compression
 
 ## 🧪 Testing Checklist
 
@@ -153,12 +165,22 @@ Before submission, verify:
 
 ## 📦 Dependencies
 
+### Production Dependencies
 - **react**: ^18.2.0
 - **react-dom**: ^18.2.0
 - **primereact**: ^10.9.7
 - **primeicons**: ^6.0.1
+
+### Development Dependencies
 - **typescript**: ^5.2.2
 - **vite**: ^7.3.1
+- **@vitejs/plugin-react**: ^4.2.1
+- **eslint** and related plugins
+
+### Build Configuration
+- **Environment Variables**: Supports `VITE_API_BASE_URL` (optional, defaults to Art Institute API)
+- **Optional Dependencies**: PrimeReact's optional dependencies (chart.js, quill, etc.) are externalized in the build to reduce bundle size
+- **Code Splitting**: Automatic vendor chunk splitting for optimal loading performance
 
 ## 🚀 Deployment
 
@@ -170,22 +192,57 @@ The application is ready for deployment to multiple platforms:
 - ✅ **Any static hosting provider**
 
 ### Quick Deployment Steps
-1. Build the application: `npm run build`
-2. Deploy the `dist` folder to your chosen platform
-3. Configuration files are already set up for automatic deployment
+1. **Build the application**: `npm run build`
+   - This creates an optimized production build in the `dist` folder
+   - TypeScript compilation and type checking included
+   - Build optimizations: code splitting, minification, tree-shaking
+2. **Deploy the `dist` folder** to your chosen platform
+3. **Configuration files** are already set up for automatic deployment
+
+### Build Commands
+```bash
+# Development server
+npm run dev
+
+# Production build
+npm run build
+
+# Production build (explicit)
+npm run build:prod
+
+# Preview production build locally
+npm run preview
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+### Build Output
+The production build generates:
+- **React vendor chunk**: ~141 KB (gzipped: ~45 KB)
+- **PrimeReact vendor chunk**: ~7.5 KB (gzipped: ~2.5 KB)
+- **Main bundle**: ~409 KB (gzipped: ~110 KB)
+- **CSS and assets**: Optimized and compressed
 
 ### Detailed Deployment Guide
 For detailed deployment instructions, see **[DEPLOYMENT.md](./DEPLOYMENT.md)** which includes:
-- Step-by-step guides for each platform
+- Step-by-step guides for each platform (Netlify, Vercel, Cloudflare Pages, GitHub Pages)
 - Environment variable configuration
-- Troubleshooting tips
+- Build troubleshooting tips
 - Post-deployment checklist
+- Performance optimization tips
 
 ## 📝 Notes
 
 - The application strictly follows the requirement of **no prefetching**. It only fetches the current page and tracks selections using IDs.
 - Custom selection uses a progressive approach: selects from current page first, then auto-selects as user navigates.
 - All core logic is manually implemented to avoid AI-generated patterns.
+- **Build Optimizations**: Optional PrimeReact dependencies (chart.js, quill, FullCalendar) are externalized to reduce bundle size since they're not used in this application.
+- **Environment Variables**: The API base URL can be configured via `VITE_API_BASE_URL` environment variable, with sensible defaults.
+- **Type Safety**: Full TypeScript support with strict type checking enabled.
 
 ## 👤 Author
 
