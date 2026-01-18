@@ -21,7 +21,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const overlayRef = useRef<OverlayPanel>(null);
   const [selectCount, setSelectCount] = useState<number | null>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [remainingSelections, setRemainingSelections] = useState<number>(0);
   const [targetSelectionCount, setTargetSelectionCount] = useState<number>(0);
 
@@ -150,32 +150,6 @@ function App() {
     overlayRef.current?.hide();
   };
 
-  const handleDeselectCustom = () => {
-    if (!selectCount || selectCount <= 0) {
-      alert('Please enter a valid number greater than 0');
-      return;
-    }
-
-    const targetCount = selectCount;
-    const updatedSelection = new Set(selectedIds);
-    let deselectedCount = 0;
-
-    // Deselect rows from current page only
-    for (const artwork of artworks) {
-      if (deselectedCount >= targetCount) {
-        break;
-      }
-      
-      if (updatedSelection.has(artwork.id)) {
-        updatedSelection.delete(artwork.id);
-        deselectedCount++;
-      }
-    }
-
-    setSelectedIds(updatedSelection);
-    setSelectCount(null);
-    overlayRef.current?.hide();
-  };
 
   const titleBodyTemplate = (rowData: Artwork) => {
     return <span>{rowData.title || 'N/A'}</span>;
@@ -208,12 +182,13 @@ function App() {
           Selected: {targetSelectionCount > 0 ? targetSelectionCount : selectedIds.size} rows
         </span>
       </div>
-      <Button 
-        ref={buttonRef}
-        label="Select Multiple Rows" 
-        icon="pi pi-check-square" 
-        onClick={(e) => overlayRef.current?.toggle(e)}
-      />
+      <div ref={buttonRef}>
+        <Button 
+          label="Select Multiple Rows" 
+          icon="pi pi-check-square" 
+          onClick={(e) => overlayRef.current?.toggle(e)}
+        />
+      </div>
     </div>
   );
 
@@ -305,7 +280,7 @@ function App() {
       
       {paginatorFooter()}
 
-      <OverlayPanel ref={overlayRef} target={buttonRef.current} dismissable>
+      <OverlayPanel ref={overlayRef} dismissable>
         <div style={{ padding: '1.5rem', minWidth: '400px' }}>
           <h3 style={{ marginTop: 0, marginBottom: '0.5rem', fontSize: '1.25rem', fontWeight: 600 }}>Select Multiple Rows</h3>
           <p style={{ marginTop: 0, marginBottom: '1rem', fontSize: '0.875rem', color: '#666' }}>
@@ -315,7 +290,7 @@ function App() {
             <InputNumber
               id="selectCount"
               value={selectCount}
-              onValueChange={(e) => setSelectCount(e.value)}
+              onValueChange={(e) => setSelectCount(e.value ?? null)}
               min={0}
               showButtons
               style={{ flex: 1 }}
