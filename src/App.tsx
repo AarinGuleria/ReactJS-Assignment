@@ -21,7 +21,6 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const overlayRef = useRef<OverlayPanel>(null);
   const [selectCount, setSelectCount] = useState<number | null>(null);
-  const [remainingSelections, setRemainingSelections] = useState<number>(0);
   const [targetSelectionCount, setTargetSelectionCount] = useState<number>(0);
 
   useEffect(() => {
@@ -45,39 +44,7 @@ function App() {
   useEffect(() => {
     const pageSelected = artworks.filter(item => selectedIds.has(item.id));
     setSelectedRows(pageSelected);
-    
-    // Auto-select rows if there are remaining selections needed
-    if (remainingSelections > 0) {
-      const updatedSelection = new Set(selectedIds);
-      let added = 0;
-      
-      for (const artwork of artworks) {
-        if (added >= remainingSelections) {
-          break;
-        }
-        
-        if (!updatedSelection.has(artwork.id)) {
-          updatedSelection.add(artwork.id);
-          added++;
-        }
-      }
-      
-      if (added > 0) {
-        setSelectedIds(updatedSelection);
-        setRemainingSelections(prev => Math.max(0, prev - added));
-        
-        // If we've reached the target, reset the target count
-        if (updatedSelection.size >= targetSelectionCount) {
-          setTargetSelectionCount(0);
-        }
-      }
-    }
-    
-    // If we've reached or exceeded the target count, reset it
-    if (targetSelectionCount > 0 && selectedIds.size >= targetSelectionCount && remainingSelections === 0) {
-      setTargetSelectionCount(0);
-    }
-  }, [artworks, selectedIds, remainingSelections, targetSelectionCount]);
+  }, [artworks, selectedIds]);
 
   const handlePageChange = (event: any) => {
     // PrimeReact paginator uses 0-based page index, API uses 1-based
@@ -88,26 +55,39 @@ function App() {
   const handleSelectionChange = (e: any) => {
     const newlySelected = e.value as Artwork[];
     const updatedIds = new Set(selectedIds);
+    const currentPageIds = new Set(artworks.map(a => a.id));
+    const previouslySelectedOnPage = artworks.filter(item => selectedIds.has(item.id));
+    
+    // Check if user is deselecting (newlySelected has fewer items than previously selected on this page)
+    const isDeselecting = newlySelected.length < previouslySelectedOnPage.length;
     
     // Clear selections for current page items first
-    const currentIds = artworks.map(a => a.id);
-    currentIds.forEach(id => updatedIds.delete(id));
+    currentPageIds.forEach(id => updatedIds.delete(id));
     
-    // Then add the newly selected items
-    newlySelected.forEach(item => {
-      updatedIds.add(item.id);
-    });
+    // If user is deselecting, don't add any items from current page back
+    // This ensures all checkboxes on current page are deselected
+    // Otherwise, add the newly selected items
+    if (!isDeselecting) {
+      newlySelected.forEach(item => {
+        updatedIds.add(item.id);
+      });
+    }
     
     setSelectedIds(updatedIds);
     
-    // Reset target selection count if user manually changes selection
+    // If user deselects and we have a target count, update to show actual count
     if (targetSelectionCount > 0) {
-      setTargetSelectionCount(0);
-      setRemainingSelections(0);
+      const actualCount = updatedIds.size;
+      
+      // If actual count is less than target, show actual count
+      // This happens when user deselects checkboxes
+      if (actualCount < targetSelectionCount) {
+        setTargetSelectionCount(0);
+      }
     }
   };
 
-  const handleCustomSelection = () => {
+  const handleCustomSelection = async () => {
     if (!selectCount || selectCount <= 0) {
       alert('Please enter a valid number greater than 0');
       return;
@@ -121,29 +101,50 @@ function App() {
     // Clear existing selections and start fresh
     const updatedSelection = new Set<number>();
     let selectedCount = 0;
+    let currentPageNum = 1;
+    let hasMoreData = true;
 
-    // Select rows from current page first
-    for (const artwork of artworks) {
-      if (selectedCount >= targetCount) {
-        break;
+    // Start selecting from page 1, not current page
+    while (selectedCount < targetCount && hasMoreData) {
+      try {
+        // Fetch artworks for current page
+        const response = await fetchArtworks(currentPageNum);
+        const pageArtworks = response.data;
+        
+        if (pageArtworks.length === 0) {
+          hasMoreData = false;
+          break;
+        }
+
+        // Select rows from this page
+        for (const artwork of pageArtworks) {
+          if (selectedCount >= targetCount) {
+            break;
+          }
+          
+          updatedSelection.add(artwork.id);
+          selectedCount++;
+        }
+
+        // Move to next page if we need more selections
+        if (selectedCount < targetCount) {
+          currentPageNum++;
+          // Check if we've exceeded total records
+          if (currentPageNum > Math.ceil(response.pagination.total / rowsPerPage)) {
+            hasMoreData = false;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load artworks for selection:', error);
+        hasMoreData = false;
       }
-      
-      updatedSelection.add(artwork.id);
-      selectedCount++;
     }
-
-    // Calculate remaining selections needed after selecting from current page
-    const remaining = targetCount - selectedCount;
     
     // Update selection state immediately
     setSelectedIds(updatedSelection);
     
-    // Set remaining selections - this will auto-select as user navigates pages
-    if (remaining > 0) {
-      setRemainingSelections(remaining);
-    } else {
-      setRemainingSelections(0);
-    }
+    // Reload current page to reflect selections
+    await loadArtworks(currentPage);
     
     setSelectCount(null);
     overlayRef.current?.hide();
