@@ -13,7 +13,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
-          'prime-vendor': ['primereact', 'primeicons'],
+          'prime-vendor': ['primereact'],
         },
       },
     },
