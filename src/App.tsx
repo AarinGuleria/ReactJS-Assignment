@@ -21,7 +21,6 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const overlayRef = useRef<OverlayPanel>(null);
   const [selectCount, setSelectCount] = useState<number | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [remainingSelections, setRemainingSelections] = useState<number>(0);
   const [targetSelectionCount, setTargetSelectionCount] = useState<number>(0);
 
@@ -182,13 +181,11 @@ function App() {
           Selected: {targetSelectionCount > 0 ? targetSelectionCount : selectedIds.size} rows
         </span>
       </div>
-      <div ref={buttonRef}>
-        <Button 
-          label="Select Multiple Rows" 
-          icon="pi pi-check-square" 
-          onClick={(e) => overlayRef.current?.toggle(e)}
-        />
-      </div>
+      <Button 
+        label="Select Multiple Rows" 
+        icon="pi pi-check-square" 
+        onClick={(e) => overlayRef.current?.toggle(e)}
+      />
     </div>
   );
 
