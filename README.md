@@ -77,7 +77,7 @@ I've added a **"Select Multiple Rows"** button in the header for easier access t
 - Indicates which page to navigate to for completing selection
 - Updates dynamically as user navigates pages
 - Example: "Selected: 12 rows (selecting 20 across pages, complete by page 2)" → "Selected: 20 rows"
-- When the user navigates through the destinated page for the last row then caomes back to page 1, and deselects from the title checkbox it will show 8 rows selected ; which would be for the rows in the next pages.
+- When the user navigates through the destinated page for the last row then comes back to page 1, and deselects from the title checkbox it will show 8 rows selected ; which would be for the rows in the next pages.
 
 ## 🛠️ Installation & Setup
 
