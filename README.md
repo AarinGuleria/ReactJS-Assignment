@@ -76,6 +76,7 @@ I've added a **"Select Multiple Rows"** button in the header for easier access t
 - Shows helpful hint: "(selecting 20 across pages...)" when auto-selection is active
 - Updates dynamically as user navigates pages
 - Example: "Selected: 12 rows (selecting 20 across pages...)" → "Selected: 20 rows"
+- When the user navigates through the destinated page for the last row then caomes back to page 1, and deselects from the title checkbox it will show 8 rows selected ; which would be for the rows in the next pages.
 
 ## 🛠️ Installation & Setup
 
