@@ -189,7 +189,8 @@ function App() {
           Selected: {selectedIds.size} rows
           {autoSelectEnabled && targetSelectionCount > selectedIds.size && (
             <span style={{ color: "#999", marginLeft: "0.5rem" }}>
-              (selecting {targetSelectionCount} across pages...)
+              (selecting {targetSelectionCount} across pages, complete by page{" "}
+              {Math.ceil(targetSelectionCount / rowsPerPage)})
             </span>
           )}
         </span>

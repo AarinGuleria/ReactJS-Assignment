@@ -73,9 +73,11 @@ I've added a **"Select Multiple Rows"** button in the header for easier access t
 
 - Shows "Selected: X rows" at the top
 - Displays actual selected count (not target)
-- Shows helpful hint: "(selecting 20 across pages...)" when auto-selection is active
+- Shows helpful hint with target page number when auto-selection is active
+- Indicates which page to navigate to for completing selection
 - Updates dynamically as user navigates pages
-- Example: "Selected: 12 rows (selecting 20 across pages...)" → "Selected: 20 rows"
+- Example: "Selected: 12 rows (selecting 20 across pages, complete by page 2)" → "Selected: 20 rows"
+- When the user navigates through the destinated page for the last row then caomes back to page 1, and deselects from the title checkbox it will show 8 rows selected ; which would be for the rows in the next pages.
 
 ## 🛠️ Installation & Setup
 
@@ -304,8 +306,9 @@ useEffect(() => {
 **Scenario: User wants to select 20 rows**
 
 1. **User enters "20" in custom selection input**
-   - Display immediately shows: "Selected: 12 rows (selecting 20 across pages...)"
+   - Display immediately shows: "Selected: 12 rows (selecting 20 across pages, complete by page 2)"
    - Page 1 has 12 rows → all 12 are selected
+   - User knows they need to visit page 2 to complete the selection
    - `targetSelectionCount = 20`, `selectedIds.size = 12`, `autoSelectEnabled = true`
 
 2. **User navigates to Page 2**
